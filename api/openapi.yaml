@@ -1,0 +1,55 @@
+# AI Journalism
+openapi: '3.0.3'
+
+info:
+  description: API for writing news artiles using Open AI!
+  version: 0.1.0
+  title: AI Journalism
+
+servers:
+  - url: http://localhost:3010
+
+paths:
+  /v0/article:
+    get:
+      description: Returns a News Article
+      parameters:
+      - in: query
+        name: author
+        schema:
+          type: string
+        required: false
+      - in: query
+        name: topic
+        schema:
+          type: string
+        required: false
+      - in: query
+        name: maxwords
+        schema:
+          type: integer
+        required: false
+      responses:
+        200:
+          description: Success! An object containing a generated news article is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArticleObject'
+
+components:
+  schemas:
+    ArticleObject:
+      type: object
+      properties:
+        author:
+          type: string
+        title:
+          type: string
+        publishDate:
+          type: string
+          format: date-time
+        content:
+          type: string
+
+
