@@ -9,6 +9,7 @@ exports.getArticle = async function getArticle(req, res) {
 	// Author, Topic, Max Words
 	const author = (req.query.author === undefined) ? "Something Inc." : req.query.author;
 	const maxWords = (req.query.maxWords === undefined) ? 300 : req.query.maxWords;
+	const offset = (req.query.offset === undefined) ? 0 : req.query.offset;
 
 	/* Topic can't just have a default value. If the topic is not passed in,
 	we will use open AI to get a new topic. But we will assign it in a similar way
@@ -32,7 +33,7 @@ exports.getArticle = async function getArticle(req, res) {
 			articles: [...]
 		  }
 		 */
-		article = articlesResponse.articles[0];
+		article = articlesResponse.articles[offset];
 		// res.status(200).json({author: author, title: 'test title', publishDate: article.publishedAt, content: 'test'});
 		
 		/**

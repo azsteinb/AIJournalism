@@ -24,7 +24,7 @@ exports.getTopic = async () => {
 exports.newArticle = async (oldAritcle) => {
 	const newArticle = await openai.createCompletion({
 		model: "text-davinci-003",
-		prompt: "Write an article(150 words) based on the following description, don't make any wild assumptions: \n\n" + oldAritcle,
+		prompt: "Write an article(150 words) based on the following description, don't make any wild assumptions:" + oldAritcle,
 		temperature: 0.65,
   		max_tokens: 350,
   		top_p: 1.0,
