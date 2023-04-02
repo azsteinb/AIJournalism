@@ -1,4 +1,7 @@
-// const aimodel = require('./openAI.js');
+const axios = require('axios');
+const { JSDOM } = require('jsdom');
+const { Readability } = require('@mozilla/readability');
+
 const openAI = require('./openAI');
 
 const NewsAPI = require('newsapi');
@@ -20,31 +23,31 @@ exports.getArticle = async function getArticle(req, res) {
 	 * Now, we will get a news two articles related to the topic
 	 */
 	let article;
-	newsapi.articles({
+	newsapi.v2.everything({
 		source: 'associated-press', // required
-		sortBy: 'top', // optional
+		q: topic,
+		sortBy: 'relevancy',
+		language: 'en'
 	}).then(articlesResponse => {
-		console.log(articlesResponse.articles[0]);
-		/*
-		  {
-			status: "ok",
-			source: "associated-press",
-			sortBy: "top",
-			articles: [...]
-		  }
-		 */
 		article = articlesResponse.articles[offset];
-		// res.status(200).json({author: author, title: 'test title', publishDate: article.publishedAt, content: 'test'});
-		
-		/**
-	 	* Use openAI to synthesize articles similar to the ones we pulled
-	 	*/
-		openAI.newArticle(article.description).then(
-			text => {
-				console.log(text.data.choices);
-				res.status(200).json({author: author, title: 'test title', publishDate: article.publishedAt, content: text.data.choices[0].text});
-			}
-		);
+
+		// Download HTML
+		axios.get(article.url).then(function(code) {
+			let dom = new JSDOM(code.data, {
+				url: article.url
+			});
+
+			let parsedArticle = new Readability(dom.window.document).parse();
+
+			// Now that we have the parsedArticle from the web scraper, we can use openAI.
+			
+			openAI.newArticle(parsedArticle.textContent).then(
+				text => {
+					console.log(text.data);
+					res.status(200).json({author: author, title: article.title, publishDate: article.publishedAt, content: text.data.choices[0].text});
+				}
+			);
+		});
 	});
 	
 	
