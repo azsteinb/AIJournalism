@@ -18,7 +18,8 @@ exports.getArticle = async function getArticle(req, res) {
 	we will use open AI to get a new topic. But we will assign it in a similar way
 	and just abstract the API call into its own method (found in openAI.js)
 	*/
-	const topic = (req.query.topic === undefined) ? await getTopic() : req.query.topic;
+	const topic = (req.query.topic === undefined) ? await (await openAI.getTopic()).data.choices[0].text : req.query.topic;
+	console.log(topic)
 	/**
 	 * Now, we will get a news two articles related to the topic
 	 */

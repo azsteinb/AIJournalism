@@ -24,7 +24,7 @@ exports.getTopic = async () => {
 exports.newArticle = async (oldArticle) => {
 	const newArticle = await openai.createCompletion({
 		model: "text-davinci-003",
-		prompt: "Rewrite the following article in a concise format with no more than 300 words(but at least 200 words) and do not make any assumptions. " + 
+		prompt: "Rewrite the following article in a concise format with no more than 300 words(but at least 250 words) and do not make any assumptions. " + 
 		"Keep in mind, the article text might start with other irrelevant data like a cookies warning. You don't need to focus on that. Format it nicely."
 		+ " Here is the article:" + oldArticle,
 		temperature: 0.65,
