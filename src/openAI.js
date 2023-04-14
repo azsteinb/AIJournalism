@@ -4,31 +4,14 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-/**
- * Gets a news topic using openai
- * @returns A topic
- */
-exports.getTopic = async () => {
-	const topic = await openai.createCompletion({
-		model: "text-davinci-003",
-		prompt: "Please come up with a one word, random news topic",
-		temperature: 0.65,
-  		max_tokens: 150,
-  		top_p: 1.0,
-  		frequency_penalty: 0.0,
-  		presence_penalty: 0.0,
-	  });
-	return topic
-}
-
 exports.newArticle = async (oldArticle) => {
 	const newArticle = await openai.createCompletion({
 		model: "text-davinci-003",
-		prompt: "Rewrite the following article in a concise format with no more than 300 words(but at least 250 words) and do not make any assumptions. " + 
-		"Keep in mind, the article text might start with other irrelevant data like a cookies warning. You don't need to focus on that. Format it nicely."
+		prompt: "Rewrite the following article with no more than 500 words(but at least 300 words) and do not make any assumptions. " + 
+		"The first line should be an <h1> title. Format the data with <h2> headings for the start of each paragraph. If there are any citations in the original article, be sure to cite them in the rewrite."
 		+ " Here is the article:" + oldArticle,
 		temperature: 0.65,
-  		max_tokens: 1000,
+  		max_tokens: 2000,
   		top_p: 1.0,
   		frequency_penalty: 0.0,
   		presence_penalty: 0.0,

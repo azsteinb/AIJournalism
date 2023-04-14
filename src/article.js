@@ -1,60 +1,72 @@
-const axios = require('axios');
-const { JSDOM } = require('jsdom');
-const { Readability } = require('@mozilla/readability');
+const axios = require("axios");
+const { JSDOM } = require("jsdom");
+const { Readability } = require("@mozilla/readability");
 
-const openAI = require('./openAI');
+const openAI = require("./openAI");
 
-const NewsAPI = require('newsapi');
-const newsapi = new NewsAPI(process.env.NEWSAPI_API_KEY);
+// const NewsAPI = require('newsapi');
+// const newsapi = new NewsAPI(process.env.NEWSAPI_API_KEY);
+const https = require("https");
+const options = {
+  host: "financialmodelingprep.com",
+  port: 443,
+  path:
+    "https://financialmodelingprep.com/api/v3/stock_news?limit=10&apikey=" +
+    process.env.STOCK_API_KEY,
+  method: "GET",
+};
 
 exports.getArticle = async function getArticle(req, res) {
-	// Check if any optional parameters were passed in.
-	// Author, Topic, Max Words
-	const author = (req.query.author === undefined) ? "Something Inc." : req.query.author;
-	const maxWords = (req.query.maxWords === undefined) ? 300 : req.query.maxWords;
-	const offset = (req.query.offset === undefined) ? 0 : req.query.offset;
+  const author =
+    req.query.author === undefined ? "AI Journalism" : req.query.author;
 
-	/* Topic can't just have a default value. If the topic is not passed in,
-	we will use open AI to get a new topic. But we will assign it in a similar way
-	and just abstract the API call into its own method (found in openAI.js)
-	*/
-	const topic = (req.query.topic === undefined) ? await (await openAI.getTopic()).data.choices[0].text : req.query.topic;
-	console.log(topic)
-	/**
-	 * Now, we will get a news two articles related to the topic
-	 */
-	let article;
-	newsapi.v2.everything({
-		source: 'associated-press', // required
-		q: topic,
-		sortBy: 'relevancy',
-		language: 'en'
-	}).then(articlesResponse => {
-		article = articlesResponse.articles[offset];
 
-		// Download HTML
-		axios.get(article.url).then(function(code) {
-			let dom = new JSDOM(code.data, {
-				url: article.url
-			});
+  /**
+   * Get Stock News, scrape article data, generate article, return article
+   */
+  const request = https.request(options, (result) => {
+    result.on("data", (d) => {
+      process.stdout.write(d);
+      let i = 0;
+      parsedJSON = JSON.parse(d);
+      while (true) {
+        if (parsedJSON[i]["url"].includes("https://www.youtube.com")) {
+          i++; // We can't parse videos
+        } else {
+          break; // We found something that is not a video
+        }
+      }
+      const url = parsedJSON[i]["url"]; // Mark the url
 
-			let parsedArticle = new Readability(dom.window.document).parse();
+      axios.get(url).then((code) => { // Make a request to the url
+        let dom = new JSDOM(code.data, {
+          url: url, // save the DOM in memory
+        });
 
-			// Now that we have the parsedArticle from the web scraper, we can use openAI.
-			
-			openAI.newArticle(parsedArticle.textContent).then(
-				text => {
-					console.log(text.data);
-					res.status(200).json({author: author, title: article.title, publishDate: article.publishedAt, content: text.data.choices[0].text});
-				}
-			);
-		});
-	});
-	
-	
+        // parse the article
+        let parsedArticle = new Readability(dom.window.document).parse();
 
-	/**
-	 * Respond to client with articles formatted appropriately for wordpress
-	 */
-
-}
+        // generate a new article
+        openAI.newArticle(parsedArticle.textContent).then((text) => {
+          // return the new article
+          res.status(200).json({
+            author: author,
+            title: parsedJSON[i]["title"],
+            content: text.data.choices[0].text,
+          });
+        });
+      });
+    });
+    // Mark the end of the request
+    result.on("end", () => {
+      console.log("end");
+    });
+  });
+  // mark any errors
+  request.on("error", (error) => {
+    console.log("Error!");
+    console.log(error);
+  });
+  // End the request
+  request.end();
+};

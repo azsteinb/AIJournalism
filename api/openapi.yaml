@@ -19,20 +19,6 @@ paths:
         schema:
           type: string
         required: false
-      - in: query
-        name: topic
-        schema:
-          type: string
-        required: false
-      - in: query
-        name: maxwords
-        schema:
-          type: integer
-      - in: query
-        name: offset
-        schema:
-          type: integer
-        required: false
       responses:
         200:
           description: Success! An object containing a generated news article is returned.
@@ -50,9 +36,6 @@ components:
           type: string
         title:
           type: string
-        publishDate:
-          type: string
-          format: date-time
         content:
           type: string
 
