@@ -46,6 +46,8 @@ exports.getArticle = async function getArticle(req, res) {
         // parse the article
         let parsedArticle = new Readability(dom.window.document).parse();
 
+        console.log(parsedArticle);
+
         // generate a new article
         openAI.newArticle(parsedArticle.textContent).then((text) => {
           // return the new article
