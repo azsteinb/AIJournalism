@@ -72,7 +72,6 @@ class AIJournalismPlugin
         $obj = json_decode($res, true);
         $content = $obj['content'];
         $title = $obj['title'];
-        $author = $obj['author'];
 
         $post = array(
             'post_title' => $title,
