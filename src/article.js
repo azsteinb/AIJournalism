@@ -44,8 +44,8 @@ exports.getArticle = async function getArticle(req, res) {
         });
 
         // parse the article
-        let parsedArticle = new Readability(dom.window.document).parse();
-
+        let readability = new Readability(dom.window.document);
+				let parsedArticle = readability.parse();
         console.log(parsedArticle);
 
         // generate a new article

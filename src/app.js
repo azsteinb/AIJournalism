@@ -15,6 +15,9 @@ const apidoc = yaml.load(fs.readFileSync(apiSpec, 'utf8'));
 app.use('/v0/api-docs', swaggerUi.serve, swaggerUi.setup(apidoc));
 
 app.get('/v0/article', article.getArticle);
+app.get('/v0/test', (req, res) => {
+	res.status(200).json({test:123}).send();
+});
 
 
 app.use(
